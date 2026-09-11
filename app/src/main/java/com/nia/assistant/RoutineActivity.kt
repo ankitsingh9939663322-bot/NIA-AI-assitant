@@ -1,4 +1,3 @@
-```kotlin
 package com.nia.assistant
 
 import android.app.Activity
@@ -8,7 +7,6 @@ import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
 import android.widget.*
-import java.util.Locale
 
 class RoutineActivity : Activity() {
 
@@ -17,48 +15,113 @@ class RoutineActivity : Activity() {
     private lateinit var actionList: LinearLayout
     private lateinit var scheduleSwitch: Switch
     private lateinit var scheduleTimeInput: EditText
+    private lateinit var daySelectionLayout: LinearLayout
     private lateinit var saveButton: Button
 
     private val actions = mutableListOf<String>()
 
     private var editingRoutineId: Long? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    /*
+     * Calendar weekday values:
+     *
+     * Sunday    = 1
+     * Monday    = 2
+     * Tuesday   = 3
+     * Wednesday = 4
+     * Thursday  = 5
+     * Friday    = 6
+     * Saturday  = 7
+     */
+    private val selectedDays =
+        mutableSetOf<Int>()
+
+    private val dayNames =
+        listOf(
+            1 to "Sunday",
+            2 to "Monday",
+            3 to "Tuesday",
+            4 to "Wednesday",
+            5 to "Thursday",
+            6 to "Friday",
+            7 to "Saturday"
+        )
+
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
         super.onCreate(savedInstanceState)
 
         editingRoutineId =
-            intent.getLongExtra("routine_id", -1L)
-                .takeIf { it != -1L }
+            intent.getLongExtra(
+                "routine_id",
+                -1L
+            ).takeIf {
+                it != -1L
+            }
 
         buildUi()
 
         if (editingRoutineId != null) {
-            loadRoutine(editingRoutineId!!)
+            loadRoutine(
+                editingRoutineId!!
+            )
         }
     }
 
     private fun buildUi() {
 
         val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(24, 28, 24, 24)
-            setBackgroundColor(Color.rgb(7, 10, 16))
+            orientation =
+                LinearLayout.VERTICAL
+
+            setPadding(
+                24,
+                28,
+                24,
+                24
+            )
+
+            setBackgroundColor(
+                Color.rgb(
+                    7,
+                    10,
+                    16
+                )
+            )
         }
 
         val header = TextView(this).apply {
             text = "NIA"
             textSize = 30f
-            typeface = Typeface.DEFAULT_BOLD
-            gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
+            typeface =
+                Typeface.DEFAULT_BOLD
+            gravity =
+                Gravity.CENTER
+            setTextColor(
+                Color.WHITE
+            )
         }
 
         val subtitle = TextView(this).apply {
-            text = "Smart Routine Builder"
+            text =
+                "Smart Routine Builder"
+
             textSize = 15f
-            gravity = Gravity.CENTER
-            setTextColor(Color.LTGRAY)
-            setPadding(0, 4, 0, 24)
+
+            gravity =
+                Gravity.CENTER
+
+            setTextColor(
+                Color.LTGRAY
+            )
+
+            setPadding(
+                0,
+                4,
+                0,
+                24
+            )
         }
 
         root.addView(header)
@@ -66,22 +129,52 @@ class RoutineActivity : Activity() {
 
         val scroll = ScrollView(this)
 
-        val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
+        val content =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+            }
 
-        val nameLabel = createLabel("Routine Name")
+        /*
+         * Routine name
+         */
+        content.addView(
+            createLabel(
+                "Routine Name"
+            )
+        )
 
-        routineNameInput = EditText(this).apply {
-            hint = "Example: Morning Routine"
-            hintTextColor = Color.GRAY
-            setTextColor(Color.WHITE)
-            setSingleLine(true)
-            setPadding(18, 12, 18, 12)
-            setBackgroundColor(Color.rgb(18, 23, 34))
-        }
+        routineNameInput =
+            EditText(this).apply {
 
-        content.addView(nameLabel)
+                hint =
+                    "Example: Morning Routine"
+
+                hintTextColor =
+                    Color.GRAY
+
+                setTextColor(
+                    Color.WHITE
+                )
+
+                setSingleLine(true)
+
+                setPadding(
+                    18,
+                    12,
+                    18,
+                    12
+                )
+
+                setBackgroundColor(
+                    Color.rgb(
+                        18,
+                        23,
+                        34
+                    )
+                )
+            }
+
         content.addView(
             routineNameInput,
             LinearLayout.LayoutParams(
@@ -92,29 +185,61 @@ class RoutineActivity : Activity() {
             }
         )
 
-        val actionLabel = createLabel("Routine Actions")
+        /*
+         * Actions
+         */
+        content.addView(
+            createLabel(
+                "Routine Actions"
+            )
+        )
 
-        content.addView(actionLabel)
-
-        val actionRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-        }
-
-        actionInput = EditText(this).apply {
-            hint = "Example: Open YouTube"
-            hintTextColor = Color.GRAY
-            setTextColor(Color.WHITE)
-            setSingleLine(true)
-            setPadding(16, 8, 16, 8)
-            setBackgroundColor(Color.rgb(18, 23, 34))
-        }
-
-        val addActionButton = Button(this).apply {
-            text = "Add"
-            setOnClickListener {
-                addAction()
+        val actionRow =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.HORIZONTAL
             }
-        }
+
+        actionInput =
+            EditText(this).apply {
+
+                hint =
+                    "Example: Open YouTube"
+
+                hintTextColor =
+                    Color.GRAY
+
+                setTextColor(
+                    Color.WHITE
+                )
+
+                setSingleLine(true)
+
+                setPadding(
+                    16,
+                    8,
+                    16,
+                    8
+                )
+
+                setBackgroundColor(
+                    Color.rgb(
+                        18,
+                        23,
+                        34
+                    )
+                )
+            }
+
+        val addActionButton =
+            Button(this).apply {
+
+                text = "Add"
+
+                setOnClickListener {
+                    addAction()
+                }
+            }
 
         actionRow.addView(
             actionInput,
@@ -137,29 +262,63 @@ class RoutineActivity : Activity() {
 
         content.addView(actionRow)
 
-        actionList = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, 12, 0, 12)
-        }
+        actionList =
+            LinearLayout(this).apply {
+                orientation =
+                    LinearLayout.VERTICAL
+
+                setPadding(
+                    0,
+                    12,
+                    0,
+                    12
+                )
+            }
 
         content.addView(actionList)
 
-        val scheduleTitle = createLabel("Automatic Schedule")
+        /*
+         * Automatic schedule
+         */
+        content.addView(
+            createLabel(
+                "Automatic Schedule"
+            )
+        )
 
-        content.addView(scheduleTitle)
+        scheduleSwitch =
+            Switch(this).apply {
 
-        scheduleSwitch = Switch(this).apply {
-            text = "Enable automatic schedule"
-            textSize = 15f
-            setTextColor(Color.WHITE)
-            isChecked = false
+                text =
+                    "Enable automatic schedule"
 
-            setOnCheckedChangeListener { _, enabled ->
-                scheduleTimeInput.visibility =
-                    if (enabled) View.VISIBLE
-                    else View.GONE
+                textSize = 15f
+
+                setTextColor(
+                    Color.WHITE
+                )
+
+                isChecked = false
+
+                setOnCheckedChangeListener {
+                        _,
+                        enabled ->
+
+                    scheduleTimeInput.visibility =
+                        if (enabled) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+
+                    daySelectionLayout.visibility =
+                        if (enabled) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+                }
             }
-        }
 
         content.addView(
             scheduleSwitch,
@@ -169,15 +328,42 @@ class RoutineActivity : Activity() {
             )
         )
 
-        scheduleTimeInput = EditText(this).apply {
-            hint = "Time — example: 08:00"
-            hintTextColor = Color.GRAY
-            setTextColor(Color.WHITE)
-            setSingleLine(true)
-            visibility = View.GONE
-            setPadding(18, 8, 18, 8)
-            setBackgroundColor(Color.rgb(18, 23, 34))
-        }
+        /*
+         * Schedule time
+         */
+        scheduleTimeInput =
+            EditText(this).apply {
+
+                hint =
+                    "Time — example: 08:00"
+
+                hintTextColor =
+                    Color.GRAY
+
+                setTextColor(
+                    Color.WHITE
+                )
+
+                setSingleLine(true)
+
+                visibility =
+                    View.GONE
+
+                setPadding(
+                    18,
+                    8,
+                    18,
+                    8
+                )
+
+                setBackgroundColor(
+                    Color.rgb(
+                        18,
+                        23,
+                        34
+                    )
+                )
+            }
 
         content.addView(
             scheduleTimeInput,
@@ -186,21 +372,259 @@ class RoutineActivity : Activity() {
                 58
             ).apply {
                 topMargin = 8
-                bottomMargin = 20
             }
         )
 
-        saveButton = Button(this).apply {
-            text =
-                if (editingRoutineId == null)
-                    "Save Routine"
-                else
-                    "Update Routine"
+        /*
+         * Repeat days
+         */
+        daySelectionLayout =
+            LinearLayout(this).apply {
 
-            setOnClickListener {
-                saveRoutine()
+                orientation =
+                    LinearLayout.VERTICAL
+
+                visibility =
+                    View.GONE
+
+                setPadding(
+                    0,
+                    12,
+                    0,
+                    8
+                )
             }
+
+        val repeatLabel =
+            TextView(this).apply {
+
+                text =
+                    "Repeat On"
+
+                textSize = 14f
+
+                typeface =
+                    Typeface.DEFAULT_BOLD
+
+                setTextColor(
+                    Color.LTGRAY
+                )
+
+                setPadding(
+                    0,
+                    4,
+                    0,
+                    8
+                )
+            }
+
+        daySelectionLayout.addView(
+            repeatLabel
+        )
+
+        /*
+         * Daily option
+         */
+        val dailyCheckBox =
+            CheckBox(this).apply {
+
+                text =
+                    "Every day"
+
+                textSize = 15f
+
+                setTextColor(
+                    Color.WHITE
+                )
+
+                setOnCheckedChangeListener {
+                        _,
+                        checked ->
+
+                    if (checked) {
+
+                        selectedDays.clear()
+
+                        /*
+                         * Uncheck individual days
+                         * when Every day is selected.
+                         */
+                        for (
+                            i in 1..7
+                        ) {
+                            val child =
+                                daySelectionLayout
+                                    .findViewWithTag<CheckBox>(
+                                        "day_$i"
+                                    )
+
+                            child?.setOnCheckedChangeListener(
+                                null
+                            )
+
+                            child?.isChecked =
+                                false
+
+                            child?.setOnCheckedChangeListener {
+                                    button,
+                                    value ->
+
+                                if (value) {
+                                    selectedDays.add(
+                                        button.tag
+                                            .toString()
+                                            .removePrefix(
+                                                "day_"
+                                            )
+                                            .toInt()
+                                    ) 
+                                } else {
+                                    selectedDays.remove(
+                                        button.tag
+                                            .toString()
+                                            .removePrefix(
+                                                "day_"
+                                            )
+                                            .toInt()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        daySelectionLayout.addView(
+            dailyCheckBox
+        )
+
+        /*
+         * Individual day checkboxes
+         */
+        dayNames.forEach {
+            (dayNumber, dayName) ->
+
+            val checkBox =
+                CheckBox(this).apply {
+
+                    text =
+                        dayName
+
+                    textSize = 15f
+
+                    setTextColor(
+                        Color.WHITE
+                    )
+
+                    tag =
+                        "day_$dayNumber"
+
+                    setOnCheckedChangeListener {
+                            _,
+                            checked ->
+
+                        if (checked) {
+                            selectedDays.add(
+                                dayNumber
+                            )
+                        } else {
+                            selectedDays.remove(
+                                dayNumber
+                            )
+                        }
+
+                        /*
+                         * If any individual day
+                         * is selected, Every day
+                         * becomes unchecked.
+                         */
+                        dailyCheckBox.setOnCheckedChangeListener(
+                            null
+                        )
+
+                        dailyCheckBox.isChecked =
+                            false
+
+                        dailyCheckBox.setOnCheckedChangeListener {
+                                _,
+                                dailyChecked ->
+
+                            if (dailyChecked) {
+
+                                selectedDays.clear()
+
+                                for (
+                                    i in 1..7
+                                ) {
+                                    val child =
+                                        daySelectionLayout
+                                            .findViewWithTag<CheckBox>(
+                                                "day_$i"
+                                            )
+
+                                    child?.setOnCheckedChangeListener(
+                                        null
+                                    )
+
+                                    child?.isChecked =
+                                        false
+
+                                    child?.setOnCheckedChangeListener {
+                                            button,
+                                            value ->
+
+                                        val number =
+                                            button.tag
+                                                .toString()
+                                                .removePrefix(
+                                                    "day_"
+                                                )
+                                                .toInt()
+
+                                        if (value) {
+                                            selectedDays.add(
+                                                number
+                                            )
+                                        } else {
+                                            selectedDays.remove(
+                                                number
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            daySelectionLayout.addView(
+                checkBox
+            )
         }
+
+        content.addView(
+            daySelectionLayout
+        )
+
+        /*
+         * Save button
+         */
+        saveButton =
+            Button(this).apply {
+
+                text =
+                    if (
+                        editingRoutineId == null
+                    ) {
+                        "Save Routine"
+                    } else {
+                        "Update Routine"
+                    }
+
+                setOnClickListener {
+                    saveRoutine()
+                }
+            }
 
         content.addView(
             saveButton,
@@ -209,6 +633,7 @@ class RoutineActivity : Activity() {
                 58
             ).apply {
                 topMargin = 12
+                bottomMargin = 20
             }
         )
 
@@ -223,12 +648,18 @@ class RoutineActivity : Activity() {
             )
         )
 
-        val closeButton = Button(this).apply {
-            text = "Close"
-            setOnClickListener {
-                finish()
+        /*
+         * Close button
+         */
+        val closeButton =
+            Button(this).apply {
+
+                text = "Close"
+
+                setOnClickListener {
+                    finish()
+                }
             }
-        }
 
         root.addView(
             closeButton,
@@ -243,28 +674,47 @@ class RoutineActivity : Activity() {
         setContentView(root)
     }
 
-    private fun createLabel(text: String): TextView {
+    private fun createLabel(
+        text: String
+    ): TextView {
+
         return TextView(this).apply {
+
             this.text = text
+
             textSize = 14f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.LTGRAY)
-            setPadding(0, 4, 0, 8)
+
+            typeface =
+                Typeface.DEFAULT_BOLD
+
+            setTextColor(
+                Color.LTGRAY
+            )
+
+            setPadding(
+                0,
+                4,
+                0,
+                8
+            )
         }
     }
 
     private fun addAction() {
 
-        val action = actionInput.text
-            .toString()
-            .trim()
+        val action =
+            actionInput.text
+                .toString()
+                .trim()
 
         if (action.isEmpty()) {
+
             Toast.makeText(
                 this,
                 "Action enter karo.",
                 Toast.LENGTH_SHORT
             ).show()
+
             return
         }
 
@@ -279,57 +729,110 @@ class RoutineActivity : Activity() {
 
         actionList.removeAllViews()
 
-        actions.forEachIndexed { index, action ->
+        actions.forEachIndexed {
+                index,
+                action ->
 
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(12, 8, 8, 8)
-                setBackgroundColor(
-                    Color.rgb(18, 23, 34)
-                )
-            }
+            val row =
+                LinearLayout(this).apply {
 
-            val number = TextView(this).apply {
-                text = "${index + 1}."
-                textSize = 15f
-                typeface = Typeface.DEFAULT_BOLD
-                setTextColor(Color.WHITE)
-            }
+                    orientation =
+                        LinearLayout.HORIZONTAL
 
-            val actionText = TextView(this).apply {
-                text = action
-                textSize = 15f
-                setTextColor(Color.WHITE)
-                setPadding(12, 0, 8, 0)
-            }
+                    gravity =
+                        Gravity.CENTER_VERTICAL
 
-            val upButton = Button(this).apply {
-                text = "↑"
-                isEnabled = index > 0
+                    setPadding(
+                        12,
+                        8,
+                        8,
+                        8
+                    )
 
-                setOnClickListener {
-                    moveActionUp(index)
+                    setBackgroundColor(
+                        Color.rgb(
+                            18,
+                            23,
+                            34
+                        )
+                    )
                 }
-            }
 
-            val downButton = Button(this).apply {
-                text = "↓"
-                isEnabled = index < actions.lastIndex
+            val number =
+                TextView(this).apply {
 
-                setOnClickListener {
-                    moveActionDown(index)
+                    text =
+                        "${index + 1}."
+
+                    textSize = 15f
+
+                    typeface =
+                        Typeface.DEFAULT_BOLD
+
+                    setTextColor(
+                        Color.WHITE
+                    )
                 }
-            }
 
-            val deleteButton = Button(this).apply {
-                text = "×"
+            val actionText =
+                TextView(this).apply {
 
-                setOnClickListener {
-                    actions.removeAt(index)
-                    refreshActionList()
+                    text = action
+
+                    textSize = 15f
+
+                    setTextColor(
+                        Color.WHITE
+                    )
+
+                    setPadding(
+                        12,
+                        0,
+                        8,
+                        0
+                    )
                 }
-            }
+
+            val upButton =
+                Button(this).apply {
+
+                    text = "↑"
+
+                    isEnabled =
+                        index > 0
+
+                    setOnClickListener {
+                        moveActionUp(index)
+                    }
+                }
+
+            val downButton =
+                Button(this).apply {
+
+                    text = "↓"
+
+                    isEnabled =
+                        index < actions.lastIndex
+
+                    setOnClickListener {
+                        moveActionDown(index)
+                    }
+                }
+
+            val deleteButton =
+                Button(this).apply {
+
+                    text = "×"
+
+                    setOnClickListener {
+
+                        actions.removeAt(
+                            index
+                        )
+
+                        refreshActionList()
+                    }
+                }
 
             row.addView(
                 number,
@@ -384,11 +887,14 @@ class RoutineActivity : Activity() {
         }
     }
 
-    private fun moveActionUp(index: Int) {
+    private fun moveActionUp(
+        index: Int
+    ) {
 
         if (index <= 0) return
 
-        val item = actions.removeAt(index)
+        val item =
+            actions.removeAt(index)
 
         actions.add(
             index - 1,
@@ -398,11 +904,18 @@ class RoutineActivity : Activity() {
         refreshActionList()
     }
 
-    private fun moveActionDown(index: Int) {
+    private fun moveActionDown(
+        index: Int
+    ) {
 
-        if (index >= actions.lastIndex) return
+        if (
+            index >= actions.lastIndex
+        ) {
+            return
+        }
 
-        val item = actions.removeAt(index)
+        val item =
+            actions.removeAt(index)
 
         actions.add(
             index + 1,
@@ -414,25 +927,30 @@ class RoutineActivity : Activity() {
 
     private fun saveRoutine() {
 
-        val name = routineNameInput.text
-            .toString()
-            .trim()
+        val name =
+            routineNameInput.text
+                .toString()
+                .trim()
 
         if (name.isEmpty()) {
+
             Toast.makeText(
                 this,
                 "Routine name enter karo.",
                 Toast.LENGTH_SHORT
             ).show()
+
             return
         }
 
         if (actions.isEmpty()) {
+
             Toast.makeText(
                 this,
                 "Kam se kam ek action add karo.",
                 Toast.LENGTH_SHORT
             ).show()
+
             return
         }
 
@@ -441,47 +959,116 @@ class RoutineActivity : Activity() {
 
         val scheduleTime =
             if (scheduleEnabled) {
+
                 scheduleTimeInput.text
                     .toString()
                     .trim()
-                    .ifEmpty { null }
+                    .ifEmpty {
+                        null
+                    }
+
             } else {
                 null
             }
 
-        if (scheduleEnabled && scheduleTime == null) {
+        if (
+            scheduleEnabled &&
+            scheduleTime == null
+        ) {
+
             Toast.makeText(
                 this,
                 "Schedule time enter karo.",
                 Toast.LENGTH_SHORT
             ).show()
+
             return
         }
 
         if (
             scheduleTime != null &&
-            !isValidTime(scheduleTime)
+            !isValidTime(
+                scheduleTime
+            )
         ) {
+
             Toast.makeText(
                 this,
                 "Time HH:mm format mein enter karo. Example: 08:00",
                 Toast.LENGTH_SHORT
             ).show()
+
             return
         }
 
+        /*
+         * Selected days.
+         *
+         * Empty = every day.
+         */
+        val repeatDays =
+            if (scheduleEnabled) {
+                selectedDays
+                    .toList()
+                    .sorted()
+            } else {
+                emptyList()
+            }
+
         if (editingRoutineId == null) {
 
-            RoutineManager.create(
-                context = this,
-                name = name,
-                actions = actions,
-                scheduleTime = scheduleTime
-            )
+            val routine =
+                RoutineManager.create(
+                    context = this,
+                    name = name,
+                    actions = actions,
+                    scheduleTime =
+                        scheduleTime,
+                    repeatDays =
+                        repeatDays
+                )
+
+            if (scheduleTime != null) {
+
+                val scheduled =
+                    RoutineScheduler.schedule(
+                        this,
+                        routine
+                    )
+
+                if (!scheduled) {
+
+                    Toast.makeText(
+                        this,
+                        "Routine saved, lekin schedule set nahi ho paaya.",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    setResult(
+                        RESULT_OK
+                    )
+
+                    finish()
+
+                    return
+                }
+            }
 
             Toast.makeText(
                 this,
-                "Routine saved.",
+                if (
+                    scheduleTime != null
+                ) {
+                    if (
+                        repeatDays.isEmpty()
+                    ) {
+                        "Routine saved & daily scheduled."
+                    } else {
+                        "Routine saved & scheduled."
+                    }
+                } else {
+                    "Routine saved."
+                },
                 Toast.LENGTH_SHORT
             ).show()
 
@@ -494,33 +1081,87 @@ class RoutineActivity : Activity() {
                 )
 
             if (existing == null) {
+
                 Toast.makeText(
                     this,
                     "Routine nahi mili.",
                     Toast.LENGTH_SHORT
                 ).show()
+
                 return
             }
 
-            existing.name = name
+            /*
+             * Old alarm remove first.
+             */
+            RoutineScheduler.cancel(
+                this,
+                existing.id
+            )
+
+            existing.name =
+                name
+
             existing.actions =
                 actions.toMutableList()
+
             existing.scheduleTime =
                 scheduleTime
+
+            existing.repeatDays =
+                repeatDays.toMutableList()
 
             RoutineManager.save(
                 this,
                 existing
             )
 
+            /*
+             * New alarm create.
+             */
+            if (scheduleTime != null) {
+
+                val scheduled =
+                    RoutineScheduler.schedule(
+                        this,
+                        existing
+                    )
+
+                if (!scheduled) {
+
+                    Toast.makeText(
+                        this,
+                        "Routine updated, lekin schedule set nahi ho paaya.",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    setResult(
+                        RESULT_OK
+                    )
+
+                    finish()
+
+                    return
+                }
+            }
+
             Toast.makeText(
                 this,
-                "Routine updated.",
+                if (
+                    scheduleTime != null
+                ) {
+                    "Routine updated & scheduled."
+                } else {
+                    "Routine updated."
+                },
                 Toast.LENGTH_SHORT
             ).show()
         }
 
-        setResult(RESULT_OK)
+        setResult(
+            RESULT_OK
+        )
+
         finish()
     }
 
@@ -539,15 +1180,19 @@ class RoutineActivity : Activity() {
         )
 
         actions.clear()
+
         actions.addAll(
             routine.actions
         )
 
         refreshActionList()
 
-        if (routine.scheduleTime != null) {
+        if (
+            routine.scheduleTime != null
+        ) {
 
-            scheduleSwitch.isChecked = true
+            scheduleSwitch.isChecked =
+                true
 
             scheduleTimeInput.setText(
                 routine.scheduleTime
@@ -555,6 +1200,51 @@ class RoutineActivity : Activity() {
 
             scheduleTimeInput.visibility =
                 View.VISIBLE
+
+            daySelectionLayout.visibility =
+                View.VISIBLE
+
+            /*
+             * Restore selected days.
+             */
+            selectedDays.clear()
+
+            selectedDays.addAll(
+                routine.repeatDays
+            )
+
+            /*
+             * If no days were stored,
+             * it means every day.
+             */
+            if (
+                routine.repeatDays.isEmpty()
+            ) {
+
+                val daily =
+                    daySelectionLayout
+                        .getChildAt(1)
+
+                        as? CheckBox
+
+                daily?.isChecked =
+                    true
+
+            } else {
+
+                routine.repeatDays
+                    .forEach { day ->
+
+                        val checkBox =
+                            daySelectionLayout
+                                .findViewWithTag<CheckBox>(
+                                    "day_$day"
+                                )
+
+                        checkBox?.isChecked =
+                            true
+                    }
+            }
         }
     }
 
@@ -562,8 +1252,11 @@ class RoutineActivity : Activity() {
         value: String
     ): Boolean {
 
-        if (!value.matches(
-                Regex("""^\d{2}:\d{2}$""")
+        if (
+            !value.matches(
+                Regex(
+                    """^\d{2}:\d{2}$"""
+                )
             )
         ) {
             return false
@@ -584,4 +1277,3 @@ class RoutineActivity : Activity() {
                 minute in 0..59
     }
 }
-```
