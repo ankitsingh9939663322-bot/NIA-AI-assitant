@@ -16,21 +16,37 @@ object RoutineScheduler {
         routine: NiaRoutine
     ): Boolean {
 
-        val time = routine.scheduleTime ?: return false
+        val time =
+            routine.scheduleTime
+                ?: return false
 
         if (!routine.enabled) {
-            cancel(context, routine.id)
+            cancel(
+                context,
+                routine.id
+            )
             return false
         }
 
-        val parts = time.split(":")
+        val parts =
+            time.split(":")
 
-        if (parts.size != 2) return false
+        if (parts.size != 2) {
+            return false
+        }
 
-        val hour = parts[0].toIntOrNull() ?: return false
-        val minute = parts[1].toIntOrNull() ?: return false
+        val hour =
+            parts[0].toIntOrNull()
+                ?: return false
 
-        if (hour !in 0..23 || minute !in 0..59) {
+        val minute =
+            parts[1].toIntOrNull()
+                ?: return false
+
+        if (
+            hour !in 0..23 ||
+            minute !in 0..59
+        ) {
             return false
         }
 
@@ -39,16 +55,20 @@ object RoutineScheduler {
                 Context.ALARM_SERVICE
             ) as AlarmManager
 
-        val intent = Intent(
-            context,
-            RoutineReceiver::class.java
-        ).apply {
-            action = ACTION_RUN_ROUTINE
-            putExtra(
-                "routine_id",
-                routine.id
-            )
-        }
+        val intent =
+            Intent(
+                context,
+                RoutineReceiver::class.java
+            ).apply {
+
+                action =
+                    ACTION_RUN_ROUTINE
+
+                putExtra(
+                    "routine_id",
+                    routine.id
+                )
+            }
 
         val pendingIntent =
             PendingIntent.getBroadcast(
@@ -59,31 +79,58 @@ object RoutineScheduler {
                         PendingIntent.FLAG_IMMUTABLE
             )
 
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
+        /*
+         * Start with today's date and selected time.
+         */
+        val now =
+            Calendar.getInstance()
 
-        if (calendar.timeInMillis <=
-            System.currentTimeMillis()
-        ) {
-            calendar.add(
-                Calendar.DAY_OF_YEAR,
-                1
-            )
-        }
+        val target =
+            Calendar.getInstance().apply {
+
+                set(
+                    Calendar.HOUR_OF_DAY,
+                    hour
+                )
+
+                set(
+                    Calendar.MINUTE,
+                    minute
+                )
+
+                set(
+                    Calendar.SECOND,
+                    0
+                )
+
+                set(
+                    Calendar.MILLISECOND,
+                    0
+                )
+            }
 
         /*
-         * If no specific days are selected,
-         * run every day.
+         * If there are no selected days,
+         * routine runs every day.
          */
-        if (routine.repeatDays.isEmpty()) {
+        if (
+            routine.repeatDays.isEmpty()
+        ) {
+
+            if (
+                target.timeInMillis <=
+                now.timeInMillis
+            ) {
+
+                target.add(
+                    Calendar.DAY_OF_YEAR,
+                    1
+                )
+            }
 
             alarmManager.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
+                target.timeInMillis,
                 pendingIntent
             )
 
@@ -91,22 +138,20 @@ object RoutineScheduler {
         }
 
         /*
-         * Find the next selected weekday.
+         * Selected-day scheduling.
          *
-         * Calendar:
-         * Sunday = 1
-         * Monday = 2
-         * ...
-         * Saturday = 7
+         * Finds the next occurrence of
+         * any selected weekday.
          */
-        var found = false
-
-        for (offset in 0..7) {
+        for (
+            offset in 0..7
+        ) {
 
             val candidate =
                 Calendar.getInstance().apply {
+
                     timeInMillis =
-                        calendar.timeInMillis
+                        target.timeInMillis
 
                     add(
                         Calendar.DAY_OF_YEAR,
@@ -114,32 +159,85 @@ object RoutineScheduler {
                     )
                 }
 
-            val day =
+            val candidateDay =
                 candidate.get(
                     Calendar.DAY_OF_WEEK
                 )
 
-            if (routine.repeatDays.contains(day)) {
+            val isSelected =
+                routine.repeatDays.contains(
+                    candidateDay
+                )
 
-                calendar.timeInMillis =
-                    candidate.timeInMillis
+            if (!isSelected) {
+                continue
+            }
 
-                found = true
-                break
+            /*
+             * If candidate is today but
+             * scheduled time has already passed,
+             * don't select today.
+             */
+            if (
+                offset == 0 &&
+                candidate.timeInMillis <=
+                now.timeInMillis
+            ) {
+                continue
+            }
+
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                candidate.timeInMillis,
+                pendingIntent
+            )
+
+            return true
+        }
+
+        /*
+         * Safety fallback:
+         * find the next selected day starting
+         * from tomorrow.
+         */
+        for (
+            offset in 1..7
+        ) {
+
+            val candidate =
+                Calendar.getInstance().apply {
+
+                    timeInMillis =
+                        target.timeInMillis
+
+                    add(
+                        Calendar.DAY_OF_YEAR,
+                        offset
+                    )
+                }
+
+            val candidateDay =
+                candidate.get(
+                    Calendar.DAY_OF_WEEK
+                )
+
+            if (
+                routine.repeatDays.contains(
+                    candidateDay
+                )
+            ) {
+
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    candidate.timeInMillis,
+                    pendingIntent
+                )
+
+                return true
             }
         }
 
-        if (!found) {
-            return false
-        }
-
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            pendingIntent
-        )
-
-        return true
+        return false
     }
 
     fun cancel(
@@ -152,12 +250,15 @@ object RoutineScheduler {
                 Context.ALARM_SERVICE
             ) as AlarmManager
 
-        val intent = Intent(
-            context,
-            RoutineReceiver::class.java
-        ).apply {
-            action = ACTION_RUN_ROUTINE
-        }
+        val intent =
+            Intent(
+                context,
+                RoutineReceiver::class.java
+            ).apply {
+
+                action =
+                    ACTION_RUN_ROUTINE
+            }
 
         val pendingIntent =
             PendingIntent.getBroadcast(
@@ -168,7 +269,10 @@ object RoutineScheduler {
                         PendingIntent.FLAG_IMMUTABLE
             )
 
-        alarmManager.cancel(pendingIntent)
+        alarmManager.cancel(
+            pendingIntent
+        )
+
         pendingIntent.cancel()
     }
 
@@ -177,7 +281,9 @@ object RoutineScheduler {
     ) {
 
         val routines =
-            RoutineManager.getAll(context)
+            RoutineManager.getAll(
+                context
+            )
 
         routines.forEach { routine ->
 
@@ -185,6 +291,7 @@ object RoutineScheduler {
                 routine.enabled &&
                 routine.scheduleTime != null
             ) {
+
                 schedule(
                     context,
                     routine
@@ -200,6 +307,7 @@ object RoutineScheduler {
         RoutineManager
             .getAll(context)
             .forEach { routine ->
+
                 cancel(
                     context,
                     routine.id
