@@ -28,6 +28,10 @@
             </intent-filter>
 
         </activity>
+        
+        <activity
+            android:name=".RoutineActivity"
+            android:exported="false" />
 
         <!-- Hey NIA background voice service -->
         <service
