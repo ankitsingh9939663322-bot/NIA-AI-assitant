@@ -154,6 +154,33 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
         root.addView(wakeRow)
 
+        // =========================================================
+        // SMART ROUTINE BUTTON
+        // =========================================================
+
+        val routineButton = Button(this).apply {
+            text = "⚙ Smart Routine"
+
+            setOnClickListener {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        RoutineActivity::class.java
+                    )
+                )
+            }
+        }
+
+        root.addView(
+            routineButton,
+            LinearLayout.LayoutParams(
+                -1,
+                58
+            ).apply {
+                topMargin = 10
+            }
+        )
+
         setContentView(root)
     }
 
@@ -191,10 +218,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             .trim()
 
         /*
-         * =========================================================
          * MEMORY
-         * Existing person / relationship memory preserved
-         * =========================================================
          */
 
         val remember = Regex(
@@ -202,7 +226,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         ).find(s)
 
         if (remember != null) {
-
             val person = remember.groupValues[1].trim()
             val relation = remember.groupValues[2].trim()
 
@@ -218,7 +241,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         }
 
         if (s.startsWith("forget ")) {
-
             val person = s
                 .removePrefix("forget ")
                 .trim()
@@ -239,7 +261,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         ).find(s)
 
         if (who != null) {
-
             val person = who.groupValues[1].trim()
 
             val relation = memory.getString(
@@ -262,7 +283,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             s.contains("what do you remember") ||
             s.contains("my memories")
         ) {
-
             val saved = memory
                 .all
                 .filterKeys {
@@ -285,9 +305,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         }
 
         /*
-         * =========================================================
          * EXISTING COMMANDS
-         * =========================================================
          */
 
         when {
@@ -341,164 +359,118 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             }
 
             s.contains("open youtube") -> {
-
                 openUrl("https://www.youtube.com")
-
                 speak("Opening YouTube.")
-
                 return
             }
 
             s.contains("open google") -> {
-
                 openUrl("https://www.google.com")
-
                 speak("Opening Google.")
-
                 return
             }
 
             s.contains("open whatsapp") -> {
-
                 openUrl("https://web.whatsapp.com")
-
                 speak("Opening WhatsApp.")
-
                 return
             }
 
             s.contains("open instagram") -> {
-
                 openUrl("https://www.instagram.com")
-
                 speak("Opening Instagram.")
-
                 return
             }
 
             s.contains("open gmail") -> {
-
                 openUrl("https://mail.google.com")
-
                 speak("Opening Gmail.")
-
                 return
             }
 
             s.contains("open settings") -> {
-
                 startActivity(
                     Intent(Settings.ACTION_SETTINGS)
                 )
-
                 speak("Opening Android settings.")
-
                 return
             }
 
             s.contains("open bluetooth") -> {
-
                 startActivity(
                     Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
                 )
-
                 speak("Opening Bluetooth settings.")
-
                 return
             }
 
             s.contains("open wifi") -> {
-
                 startActivity(
                     Intent(Settings.ACTION_WIFI_SETTINGS)
                 )
-
                 speak("Opening Wi-Fi settings.")
-
                 return
             }
 
             s.contains("set alarm") ||
                     s.contains("alarm") -> {
-
                 startActivity(
                     Intent(android.provider.AlarmClock.ACTION_SET_ALARM)
                 )
-
                 speak("Opening the alarm screen.")
-
                 return
             }
 
             s.contains("set timer") ||
                     s.contains("timer") -> {
-
                 startActivity(
                     Intent(android.provider.AlarmClock.ACTION_SET_TIMER)
                 )
-
                 speak("Opening the timer.")
-
                 return
             }
 
             s.contains("open camera") -> {
-
                 try {
-
                     startActivity(
                         Intent("android.media.action.IMAGE_CAPTURE")
                     )
-
                     speak("Opening camera.")
-
                 } catch (e: Exception) {
-
                     speak(
                         "I couldn’t open the camera."
                     )
                 }
-
                 return
             }
 
             s.contains("open calculator") -> {
-
                 try {
-
                     startActivity(
                         Intent(Intent.ACTION_MAIN)
                             .addCategory(
                                 Intent.CATEGORY_APP_CALCULATOR
                             )
                     )
-
                     speak("Opening calculator.")
-
                 } catch (e: Exception) {
-
                     speak(
                         "Calculator isn’t available."
                     )
                 }
-
                 return
             }
 
             s.contains("open maps") ||
                     s.contains("navigate") -> {
-
                 openUrl(
                     "https://maps.google.com"
                 )
-
                 speak("Opening Maps.")
-
                 return
             }
 
             s.contains("call ") -> {
-
                 val number = s
                     .substringAfter("call ")
                     .trim()
@@ -508,7 +480,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                         Regex("[0-9+ ()-]{5,}")
                     )
                 ) {
-
                     startActivity(
                         Intent(
                             Intent.ACTION_DIAL,
@@ -518,23 +489,18 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                             )
                         )
                     )
-
                     speak("Opening the dialer.")
-
                 } else {
-
                     speak(
                         "Tell me a phone number, " +
                                 "for example: call 9876543210."
                     )
                 }
-
                 return
             }
 
             s.contains("help") ||
                     s.contains("what can you do") -> {
-
                 speak(
                     "I can open apps and websites, " +
                             "search Google, open settings, " +
@@ -542,46 +508,33 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                             "tell time and date, remember people, " +
                             "and connect to my AI service."
                 )
-
                 return
             }
         }
 
         /*
-         * =========================================================
          * AI FALLBACK
-         * =========================================================
-         *
-         * Existing commands are checked first.
-         * Unknown natural-language requests go to AiClient.
          */
 
         status.text = "● Thinking…"
 
         AiClient.ask(q) { reply ->
-
             runOnUiThread {
-
                 status.text = "● Ready"
-
                 speak(reply)
             }
         }
     }
 
     private fun openUrl(url: String) {
-
         try {
-
             startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(url)
                 )
             )
-
         } catch (e: Exception) {
-
             speak("I couldn’t open that.")
         }
     }
@@ -593,14 +546,12 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
             requestPermissions(
                 arrayOf(
                     Manifest.permission.RECORD_AUDIO
                 ),
                 10
             )
-
             return
         }
 
@@ -609,21 +560,14 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         val intent = Intent(
             RecognizerIntent.ACTION_RECOGNIZE_SPEECH
         ).apply {
-
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
             )
-
-            /*
-             * en-IN allows English/Hinglish-style speech recognition.
-             * Later we can add language selection for Hindi.
-             */
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE,
                 "en-IN"
             )
-
             putExtra(
                 RecognizerIntent.EXTRA_PROMPT,
                 "Talk to NIA"
@@ -643,19 +587,16 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
             requestPermissions(
                 arrayOf(
                     Manifest.permission.RECORD_AUDIO
                 ),
                 10
             )
-
             return
         }
 
         try {
-
             val intent = Intent(
                 this,
                 NiaWakeService::class.java
@@ -671,7 +612,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             )
 
         } catch (e: Exception) {
-
             speak(
                 "I couldn't start Hey NIA listening mode."
             )
@@ -681,7 +621,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
     private fun stopWakeService() {
 
         try {
-
             val intent = Intent(
                 this,
                 NiaWakeService::class.java
@@ -697,7 +636,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             )
 
         } catch (e: Exception) {
-
             speak(
                 "I couldn't stop Hey NIA listening mode."
             )
@@ -709,7 +647,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         resultCode: Int,
         data: Intent?
     ) {
-
         super.onActivityResult(
             requestCode,
             resultCode,
@@ -722,32 +659,27 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             requestCode == 20 &&
             resultCode == RESULT_OK
         ) {
-
             val results =
                 data?.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS
                 )
 
             if (!results.isNullOrEmpty()) {
-
                 respond(results[0])
             }
         }
     }
 
     override fun onInit(result: Int) {
-
         if (
             result ==
             TextToSpeech.SUCCESS
         ) {
-
             tts.language = Locale.US
         }
     }
 
     override fun onDestroy() {
-
         if (::tts.isInitialized) {
             tts.stop()
             tts.shutdown()
