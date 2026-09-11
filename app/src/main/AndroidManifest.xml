@@ -35,6 +35,10 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+        <receiver
+            android:name=".RoutineReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 
