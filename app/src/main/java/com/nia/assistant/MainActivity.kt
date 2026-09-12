@@ -88,7 +88,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
         input = EditText(this).apply {
             hint = "Talk to NIA..."
-            hintTextColor = Color.GRAY
+            setHintTextColor(Color.GRAY)
             setTextColor(Color.WHITE)
             setSingleLine(true)
         }

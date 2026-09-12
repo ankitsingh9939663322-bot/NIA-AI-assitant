@@ -150,8 +150,7 @@ class RoutineActivity : Activity() {
                 hint =
                     "Example: Morning Routine"
 
-                hintTextColor =
-                    Color.GRAY
+                setHintTextColor(Color.GRAY)
 
                 setTextColor(
                     Color.WHITE
@@ -206,8 +205,7 @@ class RoutineActivity : Activity() {
                 hint =
                     "Example: Open YouTube"
 
-                hintTextColor =
-                    Color.GRAY
+                setHintTextColor(Color.GRAY)
 
                 setTextColor(
                     Color.WHITE
@@ -337,8 +335,7 @@ class RoutineActivity : Activity() {
                 hint =
                     "Time — example: 08:00"
 
-                hintTextColor =
-                    Color.GRAY
+                setHintTextColor(Color.GRAY)
 
                 setTextColor(
                     Color.WHITE

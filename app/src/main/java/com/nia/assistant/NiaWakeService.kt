@@ -14,6 +14,7 @@ import android.speech.SpeechRecognizer
 class NiaWakeService : Service() {
 
     private var speechRecognizer: SpeechRecognizer? = null
+    private var isServiceStopped = false
 
     companion object {
         private const val CHANNEL_ID = "nia_wake_channel"
@@ -250,7 +251,7 @@ class NiaWakeService : Service() {
             android.os.Looper.getMainLooper()
         ).postDelayed(
             {
-                if (!isStopped) {
+                if (!isServiceStopped) {
                     startListening()
                 }
             },
@@ -268,6 +269,8 @@ class NiaWakeService : Service() {
     }
 
     override fun onDestroy() {
+
+        isServiceStopped = true
 
         speechRecognizer?.stopListening()
         speechRecognizer?.destroy()
